@@ -15,35 +15,26 @@ export class UsersService {
 
 
   
-  async create(@Body() body : UserValidation) : Promise< { data: User}> {
-    const createUser = await this.Model.save(body)
-
-    return {
-      data: createUser
-    }
+  async create(@Body() body : UserValidation) : Promise<User> {
+    return await this.Model.save(body)
   }
 
-  async findAll(): Promise<{data : User[] }> {
-
+  async findAll(): Promise<User[]> {
     const users =  await this.Model.find();
-    return {
-      data: users
-    }
+    return users
   }
 
 
-  async findOne(id: number): Promise<{data: User}> {
+  async findOne(id: number): Promise<User> {
     const user = await this.Model.findOne({ where: {id}});
 
     if(!user ){
       throw new NotFoundException(`Não encontrou esse usuario ${id}`)
     }
-    return {
-      data: user
-    }
+    return user
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) : Promise<{data: User}>{
+  async update(id: number, updateUserDto: UpdateUserDto) : Promise<User>{
     
     const user = await this.Model.findOne({ where: {id}});
 
@@ -53,20 +44,17 @@ export class UsersService {
 
     await this.Model.update({ id }, updateUserDto)
 
-    return {
-      data: await this.Model.findOne({ where: {id}})
-    }
+    return this.Model.findOne({ where: {id}})
+    
   }
 
-  async remove(id: number): Promise<{data: string}> {
+  async remove(id: number): Promise<string> {
     const user = await this.Model.findOne({ where: {id}});
 
     if(!user ){
       throw new NotFoundException(`Não encontrou esse usuario ${id}`)
     }
     this.Model.delete(id)
-    return {
-      data: `Usuario deletado com sucesso ${id}`
-    }
+    return `Usuario deletado com sucesso ${id}`
   }
 }
