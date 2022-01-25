@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Body, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotFoundError } from 'rxjs';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { UserValidation } from './validation/user.validation';
+
 
 @Injectable()
 export class UsersService {
@@ -12,9 +15,12 @@ export class UsersService {
 
 
   
-  create(createUserDto: CreateUserDto) {
+  async create(@Body() body : UserValidation) : Promise< { data: User}> {
+    const createUser = await this.Model.save(body)
 
-    return 'This action adds a new user';
+    return {
+      data: createUser
+    }
   }
 
   async findAll(): Promise<{data : User[] }> {
@@ -26,15 +32,41 @@ export class UsersService {
   }
 
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number): Promise<{data: User}> {
+    const user = await this.Model.findOne({ where: {id}});
+
+    if(!user ){
+      throw new NotFoundException(`Não encontrou esse usuario ${id}`)
+    }
+    return {
+      data: user
+    }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) : Promise<{data: User}>{
+    
+    const user = await this.Model.findOne({ where: {id}});
+
+    if(!user ){
+      throw new NotFoundException(`Não encontrou esse usuario ${id}`)
+    }
+
+    await this.Model.update({ id }, updateUserDto)
+
+    return {
+      data: await this.Model.findOne({ where: {id}})
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number): Promise<{data: string}> {
+    const user = await this.Model.findOne({ where: {id}});
+
+    if(!user ){
+      throw new NotFoundException(`Não encontrou esse usuario ${id}`)
+    }
+    this.Model.delete(id)
+    return {
+      data: `Usuario deletado com sucesso ${id}`
+    }
   }
 }
