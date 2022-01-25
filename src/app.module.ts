@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { BackofficeModule } from './backoffice/backoffice.module';
+import { UsersModule } from './users/users.module';
 
 
 @Module({
-  imports: [BackofficeModule],
+  imports: [UsersModule],
   controllers: [],
   providers: [],
 })
